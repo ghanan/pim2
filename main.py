@@ -7,7 +7,6 @@ from kivy.utils import platform
 #from kivy.utils import platform
 from kivy.app import App
 from kivy.logger import Logger
-#from kivy.lang import Builder
 from kivy.storage.jsonstore import JsonStore
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.popup import Popup
@@ -167,7 +166,7 @@ class MyScreenManager(ScreenManager):
 
     def selec_archivo(self, opcion):
         #self.lista = [f[:-8] for f in listdir(getcwd()) if f[-8:]=='-PIM.csv']
-        print '--------------------', self.directorio
+        #print '--------------------', self.directorio
         self.lista = [f[:-8] for f in listdir(self.directorio) if f[-8:]=='-PIM.csv']
         self.lista.sort()
         self.ids.lis_panta.adapter = ListAdapter(data=[], cls=BotonDeLista, args_converter=self.args_converter, selection_mode='single')
@@ -188,15 +187,6 @@ class MyScreenManager(ScreenManager):
         self.modificando = False
         self.ids.i_item_alta.focus = True
         self.current = 'sc_alta'
-
-    #def alta_clave(self, popup, cla):
-        #if not cla: return
-        #self.aviso(cla)
-        #self.clave.append(cla)
-        #self.clave.sort()
-        #self.ids.i_claves_alta.text += ','+cla
-        #popup.dismiss()
-        #self.elige_claves('registro')
 
     def aviso(self, txt):
         the_content = Label(text = txt)
@@ -548,17 +538,6 @@ class MyScreenManager(ScreenManager):
             return
         if self.existe_fichero(nombre): return
         regis = [self.registros[i] for i in self.dic_items.values()]
-#        try:
-            # F = open(self.directorio + nombre + FICH, 'w')
-        # except:
-            # self.aviso('No puedo crear fichero')
-            # return
-        # try:
-            # for r in regis: F.write(r.encode('utf-8') + '\n')
-        # except:
-            # self.aviso('No puedo escribir fichero')
-            # return
-        # F.close()
         if self.graba_lista(nombre+FICH, regis):
             self.aviso('Exportados ' + str(len(regis)) + ' registros')
 
@@ -748,12 +727,8 @@ class MyScreenManager(ScreenManager):
             self.ids.i_buscar_cadena.focus = True
 
     def rellena(self, tipo=""):
-        #~ self.lis_panta.item_strings = ['wefrewr', 'klsjf lkj f']
-        #~ self.lis_panta.adapter.data.clear()
-        #self.titulo_lista = 'Ficheros disponibles'
         del self.ids.lis_panta.adapter.data[:]
         if tipo == "ficheros":
-            #~ self.ids.lis_panta.adapter.data = self.lista
             self.ids.lis_panta.adapter.cls = BotonDeLista
         else:
             self.ids.lis_panta.adapter.cls = LabelDeLista
@@ -772,13 +747,9 @@ class MyScreenManager(ScreenManager):
         self.ids.lis_c_panta._trigger_reset_populate()
 
     def args_converter(self, index, data_item):
-        #~ texto = data_item
-        #~ return {'texto': texto}
         return {'text': data_item}
 
     def args_converter_claves(self, index, data_item):
-        #~ texto = data_item.text
-        #~ return {'texto': texto}
         return {'text': data_item.text}
 
     def renombrar_clave(self):
