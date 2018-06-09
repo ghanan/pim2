@@ -1,0 +1,3 @@
+title =PIM2
+author =Antonio Tovar
+orientation =portrait

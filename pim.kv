@@ -1,0 +1,536 @@
+# File name: pim.kv
+#:import FadeTransition kivy.uix.screenmanager.FadeTransition
+#:import SwapTransition kivy.uix.screenmanager.SwapTransition
+#:import SlideTransition kivy.uix.screenmanager.SlideTransition
+#:import WipeTransition kivy.uix.screenmanager.WipeTransition
+#:import main main
+#:import ListAdapter kivy.adapters.listadapter.ListAdapter
+
+#<Layout>:
+#    canvas:
+#        Color:
+#            rgba: 0, 0, 0, 1
+#        Rectangle:
+#            pos: self.pos
+#            size: self.size
+
+<Dialogo>:
+    orientation: 'vertical'
+    TextInput:
+        id: i_dialog
+        multiline: False
+        write_tab: False
+        focus: True
+    BoxLayout:
+        Button:
+            id: b_cancelar
+            text: 'Cancelar'
+        Button:
+            id: b_aceptar
+            text: 'Aceptar'
+
+<Confirmacion>:
+    orientation: 'vertical'
+    Label:
+        id: l_conf
+    BoxLayout:
+        Button:
+            id: b_cancelar
+            text: 'Cancelar'
+            background_normal: ''
+            background_color: [0,0,1,1]
+        Button:
+            id: b_aceptar
+            text: 'Aceptar'
+            background_normal: ''
+            background_color: [1,0,0,1]
+
+<MyButton@Button>:
+    #size_hint: .6, 1
+    pos_hint: {'center_x': .5}
+    font_size: '24sp'
+    markup: True
+    #text: '[size=100px][/size]'
+    #background_normal: 'normal.png'
+    #background_down: 'down.png'
+    #color: 1,1,1,1
+
+<BotonDeLista>:
+    size_hint_y: None
+    height: '50dp'
+    font_size: '22sp'
+    #text: "".join(sel&f.texto)
+    #text: self.texto
+    on_press: app.root.lista_elegido(self, self.text)
+
+<BotonDeVocales>:
+    #size_hint_y: None
+    size: (100, '42dp')
+    deselected_color: [0,0.7,0,1]
+    selected_color: [0.8,0.3,0,1]
+    on_press: app.root.rellena_claves(self.text)
+
+<LabelDeLista>:
+    padding: (8,1)
+    size_hint_y: None
+    height: '50dp'
+    text_size: self.size
+    font_size: '18sp'
+    valign: 'middle'
+    #text: "".join(self.texto)
+    #text: self.texto
+    background_color: [0.03,0.6,0.6,1]
+    on_press: app.root.lista_elegido(self, self.text)
+
+
+<MyScreenManager>:
+    transition: SlideTransition()
+    #menu_inicial:
+    #pantalla:
+    #swipe_threshold: .2
+    titulo_lista: ""
+    titulo_fichero: ""
+    #i_item: i_item
+    i_buscar_cadena: i_buscar_cadena
+    b_buscar_claves: b_buscar_claves
+    #lis_panta: lis_panta
+    MyScreen:
+        name: 'sc_lista'
+        BoxLayout:
+            padding: 10
+            orientation: 'vertical'
+            ActionBar:
+                ActionView:
+                    use_separator: True
+                    ActionPrevious:
+                        title: 'PIM'
+                        with_previous: False
+                    ActionButton:
+                        text: 'Aceptar'
+                        on_release: root.boton_lista_der('Aceptar')
+                    ActionButton:
+                        text: 'Salir'
+                        on_release: app.stop()
+                    ActionOverflow:
+                        ActionButton:
+                            id: b_lista_over
+                            text: 'Cancelar'
+                            on_release: root.boton_lista_over(self.text)
+                        ActionButton:
+                            text: 'A -> Z'
+                            on_release: root.orden_lista('asc')
+                        ActionButton:
+                            text: 'Z -> A'
+                            on_release: root.orden_lista('des')
+            Label:
+                size_hint_y: None
+                height: '30dp'
+                text: root.titulo_lista
+            ListView:
+                id: lis_panta
+                size_hint_y: 13
+                #adapter:
+                    #ListAdapter(data=[], cls=main.BotonDeLista, args_converter=root.args_converter)
+                #item_strings: []
+            BoxLayout:
+                size_hint_y: None
+                height: '50dp'
+                MyButton:
+                    id: b_lista_izq
+                    on_release: root.boton_lista_izq(self.text)
+                MyButton:
+                    id: b_lista_cen
+                    on_release: root.boton_lista_cen(self.text)
+                MyButton:
+                    id: b_lista_der
+                    on_release: root.boton_lista_der(self.text)
+    MyScreen:
+        name: 'sc_menu_principal'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 20
+            spacing: 20
+            ActionBar:
+                ActionView:
+                    use_separator: True
+                    ActionPrevious:
+                        title: 'PIM'
+                        with_previous: False
+                    ActionOverflow:
+                    ActionButton:
+                        text: "Salir"
+                        on_release: app.stop()
+            Label:
+                size_hint_y: None
+                height: '40dp'
+                text: root.titulo_fichero + ' con ' + root.num_lineas + ' registros'
+                #text: root.titulo_fichero
+            MyButton:
+                text: 'Alta'
+                on_release: root.alta()
+            MyButton:
+                text: 'Buscar'
+                on_release: root.panta_buscar()
+            MyButton:
+                text: 'Abrir archivo'
+                on_release: root.selec_archivo('Elegir archivo')
+            MyButton:
+                text: 'Archivo nuevo'
+                on_release: root.fichero_nuevo()
+            MyButton:
+                text: 'Utilidades'
+                on_release: root.current = 'sc_utilidades'
+            MyButton:
+                text: 'Salir'
+                on_release: app.stop()
+    MyScreen:
+        name: 'sc_buscar'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 20
+            spacing: 20
+            ActionBar:
+                ActionView:
+                    use_separator: True
+                    ActionPrevious:
+                        title: 'PIM'
+                        with_previous: True
+                    ActionOverflow:
+                        ActionButton:
+                            text: 'Limpiar'
+                    ActionButton:
+                        text: 'Limpiar'
+                    ActionButton:
+                        text: "Salir"
+                        on_release: app.stop()
+            Label:
+                id: titulo_sc_buscar
+                size_hint_y: None
+                height: '40dp'
+            BoxLayout:
+                #padding: 20
+                size_hint_y: None
+                height: '40dp'
+                TextInput:
+                    id: i_buscar_cadena
+                    size_hint_x: 10
+                    #text: u''
+                    hint_text: 'cadena a buscar en cabecera'
+                    multiline: False
+                    write_tab: False
+                    focus: True
+                    #on_enter: root.busca()
+                    #on_text_validate: root.busca()
+                Button:
+                    text: '<X'
+                    size_hint_x: 1
+                    on_release: root.limpia_i_buscar_cadena()
+            BoxLayout:
+                size_hint_y: None
+                height: '40dp'
+                Label:
+                    text: 'Buscar también\nen contenido: '
+                Switch:
+                    id: sw_busca
+                    #on_active: root.switch_busca(self.active)
+                #Label:
+            BoxLayout:
+                size_hint_y: None
+                height: '40dp'
+                Label:
+                    text: 'Ignorar acentos\nñ y ç: '
+                Switch:
+                    id: sw_ignora
+            BoxLayout:
+                #padding: 20
+                size_hint_y: None
+                height: '40dp'
+                #Button:
+                TextInput:
+                    id: b_buscar_claves
+                    hint_text: '<claves>'
+                    size_hint_x: 10
+                    multiline: False
+                    on_focus: root.elige_claves('buscar')
+                    #on_release: root.elige_claves()
+                    #on_touch_down: root.elige_claves()
+                Button:
+                    text: '<X'
+                    size_hint_x: 1
+                    on_release: root.limpia_b_buscar_claves()
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: "Tipo de coincidencia"
+                BoxLayout:
+                    size_hint_y: None
+                    height: '40dp'
+                    Label:
+                        text: 'texto <Y> claves:'
+                    CheckBox:
+                        id: cb_y
+                        group: 'and_or'
+                        active: True
+                    #Label:
+                BoxLayout:
+                    size_hint_y: None
+                    height: '40dp'
+                    Label:
+                        text: 'texto <O> claves:'
+                    CheckBox:
+                        id: cb_o
+                        group: 'and_or'
+                    #Label:
+                Label:
+            BoxLayout:
+                orientation: 'horizontal'
+                #padding: 10
+                size_hint_y: '1dp'
+                MyButton:
+                    text: 'Menú'
+                    on_release: root.current = 'sc_menu_principal'
+                MyButton:
+                    text: 'Limpiar'
+                    on_release: root.limpia_busqueda()
+                MyButton:
+                    text: 'Buscar'
+                    on_release: root.busca()
+    MyScreen:
+        name: 'sc_registro'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 20
+            spacing: 20
+            ActionBar:
+                ActionView:
+                    use_separator: True
+                    ActionPrevious:
+                        title: 'PIM'
+                        with_previous: False
+                    ActionButton:
+                        text: 'Modificar'
+                        on_release: root.modificar()
+                    ActionButton:
+                        text: "Salir"
+                        on_release: app.stop()
+                    ActionOverflow:
+                        ActionButton:
+                            text: 'Eliminar'
+                            on_release: root.eliminar_registros(confirmado=False, modo='uno')
+            TextInput:
+                id: i_item
+                allow_copy: False
+                size_hint_y: '1dp'
+                background_color: [1,0.8,0,1]
+            TextInput:
+                id: i_memo
+                size_hint_y: '7dp'
+                allow_copy: False
+                cursor: (1,1)
+                background_color: [1,0.6,0,1]
+            TextInput:
+                id: i_claves
+                size_hint_y: '1dp'
+            BoxLayout:
+                orientation: 'horizontal'
+                #padding: 10
+                size_hint_y: None
+                height: '50dp'
+                MyButton:
+                    text: 'Menu'
+                    on_release: root.current = 'sc_menu_principal'
+                MyButton:
+                    text: 'Volver'
+                    on_release: root.current = 'sc_lista'
+                    #on_release: root.registro_volver()
+                MyButton:
+                    text: 'Buscar'
+                    #on_release: root.current = 'sc_buscar'
+                    on_release: root.panta_buscar()
+    MyScreen:
+        name: 'sc_alta'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 20
+            spacing: 20
+            ActionBar:
+                ActionView:
+                    use_separator: True
+                    ActionPrevious:
+                        title: 'PIM'
+                        #with_previous: True
+                        #on_previous: root.aviso('prev')
+                    ActionButton:
+                        minimum_width: '250dp'
+                        text: 'Sustituir'
+                        on_release: root.grabar(modo='modif')
+                    #ActionGroup:
+                    #    text: 'Grabar'
+                    #    mode: 'spinner'
+                        #ActionButton:
+                        #    minimum_width: '250dp'
+                        #    text: 'Sustituir'
+                        #    on_release: root.grabar(modo='modif')
+                        #ActionButton:
+                        #    text: 'Añadir'
+                        #    on_release: root.grabar(modo='nuevo')
+                    ActionButton:
+                        text: "Salir"
+                        on_release: app.stop()
+                    ActionOverflow:
+                        ActionButton:
+                            text: 'Cancelar'
+                            on_release: root.current = 'sc_buscar' if root.modificando else 'sc_menu_principal'
+                        ActionButton:
+                            text: 'Añadir'
+                            on_release: root.grabar(modo='nuevo')
+            TextInput:
+                id: i_item_alta
+                write_tab: False
+                #allow_copy: False
+                #multiline: False
+                size_hint_y: '1dp'
+                focus: True
+            TextInput:
+                id: i_memo_alta
+                size_hint_y: '7dp'
+                #allow_copy: False
+            TextInput:
+                id: i_claves_alta
+                on_focus: root.elige_claves('registro')
+                size_hint_y: '1dp'
+            BoxLayout:
+                orientation: 'horizontal'
+                #padding: 10
+                size_hint_y: None
+                height: '60dp'
+                MyButton:
+                    text: 'Limpiar\nTítulo'
+                    on_release: root.ids.i_item_alta.text = ""
+                MyButton:
+                    text: 'Limpiar\nConten.'
+                    on_release: root.ids.i_memo_alta.text = ""
+                MyButton:
+                    text: 'Limpiar\nClaves'
+                    on_release: root.ids.i_claves_alta.text = ""
+    MyScreen:
+        name: 'sc_utilidades'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 20
+            spacing: 20
+            ActionBar:
+                ActionView:
+                    use_separator: True
+                    ActionPrevious:
+                        title: 'PIM'
+                        with_previous: False
+                    ActionOverflow:
+                    ActionButton:
+                        text: 'Menu'
+                        on_release: root.current = "sc_menu_principal"
+                    ActionButton:
+                        text: "Salir"
+                        on_release: app.stop()
+            Label:
+                size_hint_y: None
+                height: '40dp'
+                text: "UTILIDADES"
+            MyButton:
+                text: 'Renombrar clave'
+                on_release: root.renombrar_clave()
+            MyButton:
+                text: 'Importar registros'
+                on_release: root.selec_archivo('Archivo a importar')
+            MyButton:
+                text: 'Ordenar (A->Z) y grabar'
+                on_release: root.orden_archivo('asc')
+            MyButton:
+                text: 'Ordenar (Z->A) y grabar'
+                on_release: root.orden_archivo('des')
+            MyButton:
+                text: 'Borrar archivo'
+                on_release: root.selec_archivo('Archivo a borrar')
+            MyButton:
+                text: 'Eliminar claves vacías'
+                on_release: root.limpia_claves_vacias()
+            MyButton:
+                text: 'Ayuda'
+    MyScreen:
+        name: 'sc_lista_claves'
+        BoxLayout:
+            padding: 10
+            orientation: 'vertical'
+            ActionBar:
+                ActionView:
+                    use_separator: True
+                    ActionPrevious:
+                        title: 'PIM'
+                        with_previous: False
+                    ActionButton:
+                        text: 'Aceptar'
+                        on_release: root.boton_lista_der('Aceptar')
+                    ActionButton:
+                        text: 'Salir'
+                        on_release: app.stop()
+                    ActionOverflow:
+                        ActionButton:
+                            #p# quitar id
+                            id: b_lista_c_over
+                            text: 'Cancelar'
+                            on_release: root.boton_lista_over(self.text)
+                        ActionButton:
+                            text: 'A -> Z'
+                            on_release: root.orden_lista('asc')
+                        ActionButton:
+                            text: 'Z -> A'
+                            on_release: root.orden_lista('des')
+            Label:
+                size_hint_y: None
+                height: '30dp'
+                text: root.titulo_lista
+            BoxLayout:
+                ListView:
+                    id: lis_c_panta
+                    adapter:
+                        ListAdapter(data=[], cls=root.smBotonDeLista, args_converter=root.args_converter_claves, selection_mode='multiple', propagate_selection_to_data=True)
+                    #size_hint_y: 13
+                    #adapter:
+                        #ListAdapter(data=[], cls=main.BotonDeLista, args_converter=root.args_converter)
+                    #item_strings: []
+                BoxLayout:
+                    size_hint_x: None
+                    width: '80dp'
+                    orientation: 'vertical'
+                    MyButton:
+                        size_hint_y: None
+                        height: '46dp'
+                        backgroun_normal: ''
+                        background_color: [0,1,0,1]
+                        text: 'Todas'
+                        on_release: root.rellena_claves('todas')
+                    MyButton:
+                        size_hint_y: None
+                        height: '46dp'
+                        backgroun_normal: ''
+                        background_color: [1,0,0,1]
+                        text: 'Marc.'
+                        on_release: root.rellena_claves('marcadas')
+                    ListView:
+                        adapter:
+                            #ListAdapter(data=root.mayusculas, cls=smBotonDeVocales)
+                            ListAdapter(data=root.mayusculas, cls=root.smBotonDeVocales)
+            BoxLayout:
+                size_hint_y: None
+                height: '50dp'
+                MyButton:
+                    id: b_lista_c_izq
+                    #text: 'Cancelar'
+                    on_release: root.boton_lista_izq(self.text)
+                MyButton:
+                    id: b_lista_c_cen
+                    on_release: root.boton_lista_cen(self.text)
+                MyButton:
+                    id: b_lista_c_der
+                    #text: 'Aceptar'
+                    on_release: root.boton_lista_der(self.text)
