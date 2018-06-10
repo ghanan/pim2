@@ -20,6 +20,7 @@ from kivy.uix.boxlayout import BoxLayout
 from os import rename, listdir, getcwd, remove
 from string import uppercase
 #para probar probar 
+# prueba de vuelta
 
 #~ from kivy.uix.pagelayout import PageLayout
 
