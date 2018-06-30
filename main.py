@@ -434,10 +434,18 @@ class MyScreenManager(ScreenManager):
         del self.claves[:]
         del self.clave[:]
         for r in self.registros:
-            campos = r.split(';')
-            self.items.append(campos[0])
-            self.memos.append(campos[1])
-            self.claves.append(campos[2:])
+            if r.count('"') == 0:
+                campos = r.split(';')
+                self.items.append(campos[0])
+                self.memos.append(campos[1])
+                self.claves.append(campos[2:])
+            else:
+                self.items.append(r[:r.find(';')])
+                pos_ult_comilla = self.pos_ultima_comilla(r)
+                claves_str = r[pos_ult_comilla+2:]
+                self.claves.append(claves_str.split(';'))
+                memo = self.quita_comillas(r[r.find(';')+2:pos_ult_comilla])
+                self.memos.append(memo)          
             for c in campos[2:]:
                 if c not in self.clave: self.clave.append(c)
         self.clave.sort()
@@ -728,15 +736,16 @@ class MyScreenManager(ScreenManager):
             self.current = 'sc_buscar'
             self.ids.i_buscar_cadena.focus = True
 
-    def quita_comillas(self, reg):
-        if reg.count(';"')==0: return reg
-        item = reg[:reg.find(';')+1]
-        pos_ult_comilla = self.pos_ultima_comilla(reg)
-        claves = reg[pos_ult_comilla+1:]
-        memo = reg[reg.find(';"')+2:pos_ult_comilla]
+    def quita_comillas(self, memo):
+        #if reg.count(';"')==0: return reg
+        #item = reg[:reg.find(';')+1]
+        #pos_ult_comilla = self.pos_ultima_comilla(reg)
+        #claves = reg[pos_ult_comilla+1:]
+        #memo = reg[reg.find(';"')+2:pos_ult_comilla]
         memo = memo.replace('""','"')
         memo = memo.replace('";"',';')
-        return item + memo + claves
+        #return item + memo + claves
+        return memo
 
     def pos_ultima_comilla(self, cad):
         pos = cad.find('";')
