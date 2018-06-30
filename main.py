@@ -728,6 +728,24 @@ class MyScreenManager(ScreenManager):
             self.current = 'sc_buscar'
             self.ids.i_buscar_cadena.focus = True
 
+    def quita_comillas(self, reg):
+        if reg.count(';"')==0: return reg
+        item = reg[:reg.find(';')+1]
+        pos_ult_comilla = self.pos_ultima_comilla(reg)
+        claves = reg[pos_ult_comilla+1:]
+        memo = reg[reg.find(';"')+2:pos_ult_comilla]
+        memo = memo.replace('""','"')
+        memo = memo.replace('";"',';')
+        return item + memo + claves
+
+    def pos_ultima_comilla(self, cad):
+        pos = cad.find('";')
+        num = cad.count('";')
+        if num == 1:
+            return pos
+        else:
+            return pos + self.pos_ultima_comilla(cad[pos+2:]) + 2
+    
     def rellena(self, tipo=""):
         del self.ids.lis_panta.adapter.data[:]
         if tipo == "ficheros":
@@ -738,6 +756,7 @@ class MyScreenManager(ScreenManager):
         self.ids.lis_panta._trigger_reset_populate()
 
     def rellena_claves(self, cuales):
+        # invocado al pulsar boton-letra
         del self.ids.lis_c_panta.adapter.data[:]
         if cuales == 'todas':
             self.ids.lis_c_panta.adapter.data.extend(self.lista_claves)

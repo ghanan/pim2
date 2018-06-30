@@ -67,7 +67,8 @@
     #size_hint_y: None
     size: (100, '42dp')
     deselected_color: [0,0.7,0,1]
-    selected_color: [0.8,0.3,0,1]
+    #selected_color: [0.8,0.3,0,1]
+    selected_color: [0,0.7,0,1]
     on_press: app.root.rellena_claves(self.text)
 
 <LabelDeLista>:
@@ -96,6 +97,7 @@
     #lis_panta: lis_panta
     MyScreen:
         name: 'sc_lista'
+        # lista de registros
         BoxLayout:
             padding: 10
             orientation: 'vertical'
@@ -517,6 +519,7 @@
                         text: 'Marc.'
                         on_release: root.rellena_claves('marcadas')
                     ListView:
+                        # lista de letras
                         adapter:
                             #ListAdapter(data=root.mayusculas, cls=smBotonDeVocales)
                             ListAdapter(data=root.mayusculas, cls=root.smBotonDeVocales)
