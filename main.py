@@ -483,8 +483,12 @@ class MyScreenManager(ScreenManager):
         if reg == "":
             self.aviso('Registro vacío')
             return False
-        if reg.count(';'):
-            self.aviso('No se puede usar ;')
+        #if reg.count(';'):
+            #self.aviso('No se puede usar ;')
+            #return False
+        cad = self.ids.i_item_alta.text + self.ids.i_claves_alta.text
+        if cad.count(';') + cad.count('"'):
+            self.aviso('No se puede usar ; ni " en item ni claves')
             return False
         return True
 
@@ -591,18 +595,23 @@ class MyScreenManager(ScreenManager):
             self.aviso('No puedo crear fichero')
             return
         if modo != 'renom':
+            #reg = self.ids.i_item_alta.text.strip() + ';' + \
+                  #self.ids.i_memo_alta.text.rstrip().replace('\n',' ^ ') + ';' + \
+                  #self.ids.i_claves_alta.text.replace(',',';')
             reg = self.ids.i_item_alta.text.strip() + ';' + \
-                  self.ids.i_memo_alta.text.rstrip().replace('\n',' ^ ') + ';' + \
+                  self.pone_comillas(self.ids.i_memo_alta.text.rstrip()) + ';' + \
                   self.ids.i_claves_alta.text.replace(',',';')
             if modo == 'nuevo':
                 self.registros.append(reg)
-                self.items.append(self.ids.i_item_alta.text)
-                self.memos.append(self.ids.i_memo_alta.text.replace('\n',' ^ '))
+                self.items.append(self.ids.i_item_alta.text.strip())
+                #self.memos.append(self.ids.i_memo_alta.text.replace('\n',' ^ '))
+                self.memos.append(self.ids.i_memo_alta.text.rstrip())
                 self.claves.append(self.ids.i_claves_alta.text.split(','))
             elif modo == 'modif':
                 self.registros[self.reg] = reg
-                self.items[self.reg] = self.ids.i_item_alta.text
-                self.memos[self.reg] = self.ids.i_memo_alta.text.replace('\n',' ^ ')
+                self.items[self.reg] = self.ids.i_item_alta.text.strip()
+                #self.memos[self.reg] = self.ids.i_memo_alta.text.replace('\n',' ^ ')
+                self.memos[self.reg] = self.ids.i_memo_alta.text.rstrip()
                 self.claves[self.reg] = self.ids.i_claves_alta.text.split(',')
         try:
             for r in self.registros: F.write(r.encode('utf-8') + '\n')
@@ -736,6 +745,12 @@ class MyScreenManager(ScreenManager):
             self.current = 'sc_buscar'
             self.ids.i_buscar_cadena.focus = True
 
+    def pone_comillas(self, memo):
+        if memo.count('"') + memo.count(';') == 0: return memo
+        memo = memo.replace('"','""')
+        memo = memo.replace(';','"";""')
+        return '"' + memo + '"'
+        
     def quita_comillas(self, memo):
         #if reg.count(';"')==0: return reg
         #item = reg[:reg.find(';')+1]
