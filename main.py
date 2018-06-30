@@ -7,6 +7,7 @@ from kivy.utils import platform
 #from kivy.utils import platform
 from kivy.app import App
 from kivy.logger import Logger
+#from kivy.lang import Builder
 from kivy.storage.jsonstore import JsonStore
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.popup import Popup
@@ -19,8 +20,6 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from os import rename, listdir, getcwd, remove
 from string import uppercase
-#para probar probar 
-# prueba de vuelta
 
 #~ from kivy.uix.pagelayout import PageLayout
 
@@ -41,6 +40,7 @@ TEMP = '-TMP.csv'
 ITEM = 0
 MEMO = 1
 CLAVES = 2
+SEP = chr(126)
 
 #ultimo = ""
 #abierto = ""
@@ -168,7 +168,7 @@ class MyScreenManager(ScreenManager):
 
     def selec_archivo(self, opcion):
         #self.lista = [f[:-8] for f in listdir(getcwd()) if f[-8:]=='-PIM.csv']
-        #print '--------------------', self.directorio
+        print '--------------------', self.directorio
         self.lista = [f[:-8] for f in listdir(self.directorio) if f[-8:]=='-PIM.csv']
         self.lista.sort()
         self.ids.lis_panta.adapter = ListAdapter(data=[], cls=BotonDeLista, args_converter=self.args_converter, selection_mode='single')
@@ -189,6 +189,15 @@ class MyScreenManager(ScreenManager):
         self.modificando = False
         self.ids.i_item_alta.focus = True
         self.current = 'sc_alta'
+
+    #def alta_clave(self, popup, cla):
+        #if not cla: return
+        #self.aviso(cla)
+        #self.clave.append(cla)
+        #self.clave.sort()
+        #self.ids.i_claves_alta.text += ','+cla
+        #popup.dismiss()
+        #self.elige_claves('registro')
 
     def aviso(self, txt):
         the_content = Label(text = txt)
@@ -405,7 +414,7 @@ class MyScreenManager(ScreenManager):
 
     def repe(self, item):
         while item in self.dic_items:
-            item += ';'
+            item += SEP
         return item
 
     def clave_nuevo_nombre(self, nuevo_nombre=""):
@@ -413,11 +422,11 @@ class MyScreenManager(ScreenManager):
             self.dialogo('Nuevo nombre para '+self.clave_renombrar, 'renombrar_clave')
             return
         for i in range(len(self.registros)):
-            campos = self.registros[i].split(';')
+            campos = self.registros[i].split(SEP)
             for j in range(2,len(campos)):
                 if campos[j] == self.clave_renombrar:
                     campos[j] = nuevo_nombre
-                    self.registros[i] = ';'.join(campos)
+                    self.registros[i] = SEP.join(campos)
                     break
             for j in range(len(self.claves[i])):
                 if self.claves[i][j] == self.clave_renombrar:
@@ -434,18 +443,10 @@ class MyScreenManager(ScreenManager):
         del self.claves[:]
         del self.clave[:]
         for r in self.registros:
-            if r.count('"') == 0:
-                campos = r.split(';')
-                self.items.append(campos[0])
-                self.memos.append(campos[1])
-                self.claves.append(campos[2:])
-            else:
-                self.items.append(r[:r.find(';')])
-                pos_ult_comilla = self.pos_ultima_comilla(r)
-                claves_str = r[pos_ult_comilla+2:]
-                self.claves.append(claves_str.split(';'))
-                memo = self.quita_comillas(r[r.find(';')+2:pos_ult_comilla])
-                self.memos.append(memo)          
+            campos = r.split(SEP)
+            self.items.append(campos[0])
+            self.memos.append(campos[1])
+            self.claves.append(campos[2:])
             for c in campos[2:]:
                 if c not in self.clave: self.clave.append(c)
         self.clave.sort()
@@ -483,12 +484,8 @@ class MyScreenManager(ScreenManager):
         if reg == "":
             self.aviso('Registro vacío')
             return False
-        #if reg.count(';'):
-            #self.aviso('No se puede usar ;')
-            #return False
-        cad = self.ids.i_item_alta.text + self.ids.i_claves_alta.text
-        if cad.count(';') + cad.count('"'):
-            self.aviso('No se puede usar ; ni " en item ni claves')
+        if reg.count(SEP):
+            self.aviso('No se puede usar ' + SEP)
             return False
         return True
 
@@ -552,6 +549,17 @@ class MyScreenManager(ScreenManager):
             return
         if self.existe_fichero(nombre): return
         regis = [self.registros[i] for i in self.dic_items.values()]
+#        try:
+            # F = open(self.directorio + nombre + FICH, 'w')
+        # except:
+            # self.aviso('No puedo crear fichero')
+            # return
+        # try:
+            # for r in regis: F.write(r.encode('utf-8') + '\n')
+        # except:
+            # self.aviso('No puedo escribir fichero')
+            # return
+        # F.close()
         if self.graba_lista(nombre+FICH, regis):
             self.aviso('Exportados ' + str(len(regis)) + ' registros')
 
@@ -595,23 +603,18 @@ class MyScreenManager(ScreenManager):
             self.aviso('No puedo crear fichero')
             return
         if modo != 'renom':
-            #reg = self.ids.i_item_alta.text.strip() + ';' + \
-                  #self.ids.i_memo_alta.text.rstrip().replace('\n',' ^ ') + ';' + \
-                  #self.ids.i_claves_alta.text.replace(',',';')
-            reg = self.ids.i_item_alta.text.strip() + ';' + \
-                  self.pone_comillas(self.ids.i_memo_alta.text.rstrip()) + ';' + \
-                  self.ids.i_claves_alta.text.replace(',',';')
+            reg = self.ids.i_item_alta.text.strip() + SEP + \
+                  self.ids.i_memo_alta.text.rstrip().replace('\n',' ^ ') + SEP + \
+                  self.ids.i_claves_alta.text.replace(',',SEP)
             if modo == 'nuevo':
                 self.registros.append(reg)
-                self.items.append(self.ids.i_item_alta.text.strip())
-                #self.memos.append(self.ids.i_memo_alta.text.replace('\n',' ^ '))
-                self.memos.append(self.ids.i_memo_alta.text.rstrip())
+                self.items.append(self.ids.i_item_alta.text)
+                self.memos.append(self.ids.i_memo_alta.text.replace('\n',' ^ '))
                 self.claves.append(self.ids.i_claves_alta.text.split(','))
             elif modo == 'modif':
                 self.registros[self.reg] = reg
-                self.items[self.reg] = self.ids.i_item_alta.text.strip()
-                #self.memos[self.reg] = self.ids.i_memo_alta.text.replace('\n',' ^ ')
-                self.memos[self.reg] = self.ids.i_memo_alta.text.rstrip()
+                self.items[self.reg] = self.ids.i_item_alta.text
+                self.memos[self.reg] = self.ids.i_memo_alta.text.replace('\n',' ^ ')
                 self.claves[self.reg] = self.ids.i_claves_alta.text.split(',')
         try:
             for r in self.registros: F.write(r.encode('utf-8') + '\n')
@@ -709,10 +712,10 @@ class MyScreenManager(ScreenManager):
 
     def limpia_claves_vacias(self):
         for i in range(len(self.registros)):
-            if self.registros[i].count(';') > 2:
-                self.registros[i] = self.registros[i].rstrip('; ')
-                while self.registros[i].count(';') < 2:
-                    self.registros[i] += ';'
+            if self.registros[i].count(SEP) > 2:
+                self.registros[i] = self.registros[i].rstrip(SEP+' ')
+                while self.registros[i].count(SEP) < 2:
+                    self.registros[i] += SEP
         if self.graba_lista(self.abierto+TEMP, self.registros):
             rename(self.directorio+self.abierto+TEMP, self.directorio+self.abierto+FICH)
             self.current = 'sc_menu_principal'
@@ -745,34 +748,13 @@ class MyScreenManager(ScreenManager):
             self.current = 'sc_buscar'
             self.ids.i_buscar_cadena.focus = True
 
-    def pone_comillas(self, memo):
-        if memo.count('"') + memo.count(';') == 0: return memo
-        memo = memo.replace('"','""')
-        memo = memo.replace(';','"";""')
-        return '"' + memo + '"'
-        
-    def quita_comillas(self, memo):
-        #if reg.count(';"')==0: return reg
-        #item = reg[:reg.find(';')+1]
-        #pos_ult_comilla = self.pos_ultima_comilla(reg)
-        #claves = reg[pos_ult_comilla+1:]
-        #memo = reg[reg.find(';"')+2:pos_ult_comilla]
-        memo = memo.replace('""','"')
-        memo = memo.replace('";"',';')
-        #return item + memo + claves
-        return memo
-
-    def pos_ultima_comilla(self, cad):
-        pos = cad.find('";')
-        num = cad.count('";')
-        if num == 1:
-            return pos
-        else:
-            return pos + self.pos_ultima_comilla(cad[pos+2:]) + 2
-    
     def rellena(self, tipo=""):
+        #~ self.lis_panta.item_strings = ['wefrewr', 'klsjf lkj f']
+        #~ self.lis_panta.adapter.data.clear()
+        #self.titulo_lista = 'Ficheros disponibles'
         del self.ids.lis_panta.adapter.data[:]
         if tipo == "ficheros":
+            #~ self.ids.lis_panta.adapter.data = self.lista
             self.ids.lis_panta.adapter.cls = BotonDeLista
         else:
             self.ids.lis_panta.adapter.cls = LabelDeLista
@@ -780,7 +762,6 @@ class MyScreenManager(ScreenManager):
         self.ids.lis_panta._trigger_reset_populate()
 
     def rellena_claves(self, cuales):
-        # invocado al pulsar boton-letra
         del self.ids.lis_c_panta.adapter.data[:]
         if cuales == 'todas':
             self.ids.lis_c_panta.adapter.data.extend(self.lista_claves)
@@ -792,9 +773,13 @@ class MyScreenManager(ScreenManager):
         self.ids.lis_c_panta._trigger_reset_populate()
 
     def args_converter(self, index, data_item):
+        #~ texto = data_item
+        #~ return {'texto': texto}
         return {'text': data_item}
 
     def args_converter_claves(self, index, data_item):
+        #~ texto = data_item.text
+        #~ return {'texto': texto}
         return {'text': data_item.text}
 
     def renombrar_clave(self):
@@ -856,7 +841,10 @@ class PimApp(App):
             return True
 
 def log(cad):
-    Logger.info('====: ' + cad)
+    try:
+        Logger.info('====: ' + cad)
+    except:
+        Logger.info('====: ' + str(cad))
 
 if __name__=="__main__":
     #from kivy.utils import platform
